@@ -1,15 +1,56 @@
-import { RespuestaTopHeadLines } from './../interfaces/interfaces';
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {
+  RespuestaTopHeadLines
+} from './../interfaces/interfaces';
+import {
+  Injectable
+} from '@angular/core';
+import {
+  HttpClient,
+  HttpHeaders
+} from '@angular/common/http';
+import {
+  environment
+} from 'src/environments/environment';
+
+const keyNews = environment.keyNews;
+const apiUrl = environment.apiUrl;
+const headers = new HttpHeaders({
+  'X-Api-key': keyNews
+});
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class NoticiasService {
 
-  constructor( private http: HttpClient) { }
+  headLinePage = 0;
+  categoryActual = '';
+  cateogryPage = 0;
+
+
+  constructor(private http: HttpClient) {}
+
+  private Query < T > (query: string) {
+    query = `${apiUrl}${query}`;
+    return this.http.get < T > (query, {
+      headers
+    });
+  }
 
   getTopHeadLines() {
-    return this.http.get<RespuestaTopHeadLines>(`https://newsapi.org/v2/top-headlines?country=ve&apiKey=bf71226d8c3a41a68dc45a970fa046dd`);
+    this.headLinePage++;
+    return this.Query < RespuestaTopHeadLines > (`/top-headlines?country=ve&page=${this.headLinePage}`);
+  }
+
+  getTopHeadLineCategory(category: string) {
+    if (this.categoryActual === category) {
+      this.cateogryPage++;
+    } else {
+      this.cateogryPage = 1;
+      this.categoryActual = category;
+    }
+
+    return this.Query < RespuestaTopHeadLines > (`/top-headlines?country=ve&category=${category}&page=${this.cateogryPage}`);
   }
 }
